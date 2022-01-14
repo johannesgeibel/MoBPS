@@ -427,7 +427,7 @@ creating.diploid <- function(dataset=NULL, vcf=NULL, chr.nr=NULL, bp=NULL, snp.n
         population$info$vcf_header <- VariantAnnotation::scanVcfHeader(tmp.fl)
         
         ## subset by chromosome
-        if(vcf.chromosomes != NULL && class(tmp.fl == "TabixFile")){
+        if(!is.null(vcf.chromosomes) && class(tmp.fl) == "TabixFile"){
           if(any(!vcf.chromosomes %in% rownames(VariantAnnotation::meta(population$info$vcf_header)$contig))){
             stop("Trying to subset vcf by chromosome, but some chromosome names were not found in the vcf header!")
           }
@@ -450,11 +450,12 @@ creating.diploid <- function(dataset=NULL, vcf=NULL, chr.nr=NULL, bp=NULL, snp.n
         dataset <- matrix(0L, nrow = dim(vcf_file)[1], ncol = dim(vcf_file)[2]*2)
         dataset[,c(TRUE,FALSE)] <- as.integer(substr(VariantAnnotation::geno(vcf_file)$GT, start=1,stop=1))
         dataset[,c(FALSE,TRUE)] <- as.integer(substr(VariantAnnotation::geno(vcf_file)$GT, start=3,stop=3))
-        colnames(dataset) <- VariantAnnotation::samples(VariantAnnotation::header(vcf_file))
-        
+        # colnames(dataset) <- c(paste0(VariantAnnotation::samples(VariantAnnotation::header(vcf_file)),"_1"),
+        #                        paste0(VariantAnnotation::samples(VariantAnnotation::header(vcf_file)),"_2"))
+        # 
         chr.nr <- as.character(MatrixGenerics::rowRanges(vcf_file)@seqnames)
         bp <- as.integer(MatrixGenerics::rowRanges(vcf_file)@ranges@start)
-        snp.name <- GRanges::names(MatrixGenerics::rowRanges(vcf_file))
+        snp.name <- names(MatrixGenerics::rowRanges(vcf_file))
         
         ## remove multivariate variants
         tmp.nalt <- which(unlist(lapply(VariantAnnotation::fixed(vcf_file)$ALT,length)) > 1)

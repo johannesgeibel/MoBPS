@@ -472,7 +472,8 @@ creating.diploid <- function(dataset=NULL, vcf=NULL, chr.nr=NULL, bp=NULL, snp.n
           hom1 <- as.character(VariantAnnotation::alt(vcf_file))
         }
         
-        
+        ## remove not needed objects to save space
+        rm(vcf_file,tmp.nalt,tmp.params,tmp.ranges,tmp.fl)
         
       }else if(requireNamespace("vcfR", quietly = TRUE)){
         vcf_file <- vcfR::read.vcfR(vcf)
@@ -486,6 +487,9 @@ creating.diploid <- function(dataset=NULL, vcf=NULL, chr.nr=NULL, bp=NULL, snp.n
         snp.name <- vcf_file@fix[,3]
         hom0 <- vcf_file@fix[,4]
         hom1 <- vcf_file@fix[,5]
+        
+        ## remove not needed objects to save space
+        rm(vcf_file,vcf_data)
       } else{
         vcf_file <- as.matrix(utils::read.table(vcf))
         vcf_data <- vcf_file[,-(1:9)]
@@ -498,7 +502,9 @@ creating.diploid <- function(dataset=NULL, vcf=NULL, chr.nr=NULL, bp=NULL, snp.n
         snp.name <- vcf_file[,3]
         hom0 <- vcf_file[,4]
         hom1 <- vcf_file[,5]
-
+        
+        ## remove not needed objects to save space
+        rm(vcf_file,vcf_data)
       }
 
       if(vcf.maxsnp< nrow(dataset)){

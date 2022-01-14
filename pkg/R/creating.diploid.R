@@ -448,8 +448,10 @@ creating.diploid <- function(dataset=NULL, vcf=NULL, chr.nr=NULL, bp=NULL, snp.n
         vcf_file <- VariantAnnotation::readVcf(tmp.fl, param = tmp.params) ## needed later, or can be removed??????
         
         dataset <- matrix(0L, nrow = dim(vcf_file)[1], ncol = dim(vcf_file)[2]*2)
-        dataset[,c(TRUE,FALSE)] <- as.integer(substr(VariantAnnotation::geno(vcf_file)$GT, start=1,stop=1))
-        dataset[,c(FALSE,TRUE)] <- as.integer(substr(VariantAnnotation::geno(vcf_file)$GT, start=3,stop=3))
+        suppressWarnings({
+          dataset[,c(TRUE,FALSE)] <- as.integer(substr(VariantAnnotation::geno(vcf_file)$GT, start=1,stop=1))
+          dataset[,c(FALSE,TRUE)] <- as.integer(substr(VariantAnnotation::geno(vcf_file)$GT, start=3,stop=3))
+        })
         # colnames(dataset) <- c(paste0(VariantAnnotation::samples(VariantAnnotation::header(vcf_file)),"_1"),
         #                        paste0(VariantAnnotation::samples(VariantAnnotation::header(vcf_file)),"_2"))
         # 

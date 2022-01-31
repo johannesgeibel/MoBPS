@@ -420,14 +420,13 @@ creating.diploid <- function(dataset=NULL, vcf=NULL, chr.nr=NULL, bp=NULL, snp.n
       exitVariantAnnotation <- 1
       if(requireNamespace("VariantAnnotation", quietly = TRUE)){
 
-        ## read (tabixed) vcf by VariantAnnotation
+        ### read (tabixed) vcf by VariantAnnotation  ---------------------------
 
         if(grepl("\\.gz$",vcf,perl = TRUE) && (file.exists(paste0(vcf,".tbi")) || file.exists(sub("\\.gz$",".tbi",vcf,perl = TRUE)))){
           tmp.fl <- Rsamtools::TabixFile(vcf)
         }else{
           tmp.fl <- vcf
         }
-        #population$info$vcf_header <- VariantAnnotation::scanVcfHeader(tmp.fl)
         tmp.header <- VariantAnnotation::scanVcfHeader(tmp.fl)
 
         if(is.na(VariantAnnotation::geno(tmp.header)["GT","Description"])){
@@ -436,7 +435,7 @@ creating.diploid <- function(dataset=NULL, vcf=NULL, chr.nr=NULL, bp=NULL, snp.n
                   "- check your vcf header for single quotes instead of double quotes around GT FORMAT description and consider changing manually or using `bcftools reheader`")
         }else{
 
-        ## subset by chromosome
+        #### subset by chromosome -------------------------------------------
           if(!is.null(vcf.chromosomes) && class(tmp.fl) == "TabixFile"){
             if(any(!vcf.chromosomes %in% rownames(VariantAnnotation::meta(tmp.header)$contig))){
               stop("Trying to subset vcf by chromosome, but some chromosome names were not found in the vcf header!\n",
@@ -489,8 +488,8 @@ creating.diploid <- function(dataset=NULL, vcf=NULL, chr.nr=NULL, bp=NULL, snp.n
             hom0 <- as.character(unlist(VariantAnnotation::ref(vcf_file)))
             hom1 <- as.character(unlist(VariantAnnotation::alt(vcf_file)))
           }
-
-          ## remove not needed objects to save space
+          
+          ## remove not needed objects to save space (header will be needed later!)
           suppressWarnings(rm(vcf_file,tmp.nalt,tmp.params,tmp.ranges,tmp.fl))
           exitVariantAnnotation <- 0
         }
@@ -1291,6 +1290,8 @@ creating.diploid <- function(dataset=NULL, vcf=NULL, chr.nr=NULL, bp=NULL, snp.n
       population$info$default.parameter.name = NULL
       population$info$default.parameter.value = list()
       
+      
+      
       if(length(is.maternal)==0){
         population$info$is.maternal <- rep(FALSE, bv.total)
       } else{
@@ -1348,8 +1349,12 @@ creating.diploid <- function(dataset=NULL, vcf=NULL, chr.nr=NULL, bp=NULL, snp.n
           population$info$base.bv <- c(population$info$base.bv, rep(base.bv, length.out = bv.total - length(population$info$base.bv)))
         }
       }
-
-
+      
+      population$info$vcf_header <- list()
+      if(exists("tmp.header")){
+        population$info$vcf_header[[1]] <- tmp.header
+        rm(tmp.header)
+      }
 
     } else if(add.chromosome==TRUE){
       if(length(chr.opt)>1){
